@@ -1,40 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Service Map</title>
 
-<title>Service Map</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<style>
-  #map { height: 600px; }
-</style>
-
+  <style>
+    #map {
+      height: 600px;
+    }
+  </style>
 </head>
 
 <body>
 
 <h3>Service Map</h3>
-
 <div id="map"></div>
 
 <script>
 
-// ✅ YOUR CSV FILE
+// ✅ CSV FILE (yours)
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv";
 
-// ✅ MAP
+// ✅ CREATE MAP
 const map = L.map('map').setView([39, -98], 4);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 // ✅ LOAD DATA
-
 async function load() {
   const res = await fetch(fileUrl);
   const text = await res.text();
 
-  const rows = text.trim().split("\n").slice(1);
+  const rows = text.trim().split(/\r?\n/).slice(1);
 
   rows.forEach(row => {
     const cols = row.split(",");
@@ -42,7 +44,7 @@ async function load() {
     const lat = parseFloat(cols[3]);
     const lon = parseFloat(cols[4]);
 
-    if (!lat || !lon) return;
+    if (isNaN(lat) || isNaN(lon)) return;
 
     L.marker([lat, lon])
       .addTo(map)
@@ -51,3 +53,8 @@ async function load() {
 }
 
 load();
+
+</script>
+
+</body>
+</html>
