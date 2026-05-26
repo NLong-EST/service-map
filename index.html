@@ -32,7 +32,7 @@
 
 <script>
 
-const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?v=2";
+const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?rand=" + new Date().getTime();
 
 const map = L.map('map').setView([39, -98], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -44,32 +44,44 @@ async function load() {
   const res = await fetch(fileUrl);
   const text = await res.text();
 
-  const headers = text.split("\n")[0].split(",");
-  const rows = text.trim().split(/\r?\n/).slice(1);
+  const parsed = parseCSV(text);
 
-  data = rows.map(row => {
-    const cols = row.split(",");
-
-    let obj = {};
-    headers.forEach((h, i) => {
-      obj[h.trim()] = cols[i];
-    });
-
-    obj.lat = parseFloat(obj["Site Lat"]);
-    obj.lon = parseFloat(obj["Site Lon"]);
-    obj.date = new Date(obj["Onsite Date"]);
-    obj.rep = obj["Rep Initials"];
-
-    return obj;
+  data = parsed.map(row => {
+    return {
+      lat: parseFloat(row["Site Lat"]),
+      lon: parseFloat(row["Site Lon"]),
+      rep: row["Rep Initials"],
+      date: new Date(row["OnsiteDate"]),
+      raw: row
+    };
   });
 
   populateReps();
   drawMarkers();
 }
 
+// ✅ Proper CSV parser (handles commas inside text)
+function parseCSV(text) {
+  const rows = text.split(/\r?\n/);
+  const headers = rows[0].split(",");
+
+  return rows.slice(1).map(row => {
+    const values = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+
+    let obj = {};
+    headers.forEach((h, i) => {
+      obj[h.trim()] = values[i]?.replace(/^"|"$/g, '') || "";
+    });
+
+    return obj;
+  });
+}
+
 function populateReps() {
   const reps = [...new Set(data.map(d => d.rep))];
   const dropdown = document.getElementById("repFilter");
+
+  dropdown.innerHTML = '<option value="">All</option>';
 
   reps.forEach(r => {
     if (!r) return;
@@ -97,14 +109,12 @@ function drawMarkers() {
     if (isNaN(d.lat) || isNaN(d.lon)) return;
 
     if (repVal && d.rep !== repVal) return;
-
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
     let popup = "";
-    for (const key in d) {
-      if (key === "lat" || key === "lon") continue;
-      popup += `<b>${key}:</b> ${d[key]}<br>`;
+    for (const key in d.raw) {
+      popup += `<b>${key}:</b> ${d.raw[key]}<br>`;
     }
 
     const marker = L.marker([d.lat, d.lon])
