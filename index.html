@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Map</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<title>Service Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-#map { height: 600px; }
+  #map { height: 600px; }
 </style>
+
 </head>
 
 <body>
@@ -20,35 +21,33 @@
 
 <script>
 
-const excelUrl = "https://skalaranalytical.sharepoint.com/sites/NASkalarServiceScheduling/Shared%20Documents/Apps/FSM%20SOs%20-%20Excel-for%20app.xlsx";
+// ✅ YOUR CSV FILE
+const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv";
 
+// ✅ MAP
 const map = L.map('map').setView([39, -98], 4);
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
+// ✅ LOAD DATA
+
 async function load() {
+  const res = await fetch(fileUrl);
+  const text = await res.text();
 
-  const res = await fetch(excelUrl);
-  const file = await res.arrayBuffer();
+  const rows = text.trim().split("\n").slice(1);
 
-  const wb = XLSX.read(file, { type: 'array' });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(sheet);
+  rows.forEach(row => {
+    const cols = row.split(",");
 
-  data.forEach(row => {
+    const lat = parseFloat(cols[3]);
+    const lon = parseFloat(cols[4]);
 
-    if (!row["Site Lat"] || !row["Site Lon"]) return;
+    if (!lat || !lon) return;
 
-    L.marker([row["Site Lat"], row["Site Lon"]])
+    L.marker([lat, lon])
       .addTo(map)
-      .bindPopup(row.Title);
-
+      .bindPopup(cols[0]);
   });
 }
 
 load();
-
-</script>
-
-</body>
-</html>
