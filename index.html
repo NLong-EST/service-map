@@ -178,7 +178,15 @@ const marker = L.circleMarker([first.lat, first.lon], {
   markers.push(marker);
 }
 
-document.getElementById("count").innerText = data.length;
+
+let filteredCount = 0;
+
+for (const key in grouped) {
+  filteredCount += grouped[key].length;
+}
+
+document.getElementById("count").innerText = filteredCount;
+
  
 }
 
