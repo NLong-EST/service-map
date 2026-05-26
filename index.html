@@ -168,7 +168,7 @@ function drawMarkers() {
   data.forEach(d => {
 
     if (isNaN(d.lat) || isNaN(d.lon)) return;
-    if (checked.length && !checked.includes(d.rep)) return;
+    if (!checked.includes(d.rep)) return;
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
