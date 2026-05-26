@@ -22,8 +22,11 @@
   <option value="">All</option>
 </select>
 
-<label>Date (YYYY-MM-DD):</label>
-<input type="text" id="dateFilter" placeholder="2026-05-01">
+<label>Start:</label>
+<input type="date" id="startDate">
+
+<label>End:</label>
+<input type="date" id="endDate">
 
 <div id="map"></div>
 
@@ -48,7 +51,7 @@ async function load() {
 
     return {
       title: cols[0],
-      date: cols[2],
+      date: new Date(cols[2]),
       rep: cols[5],
       lat: parseFloat(cols[3]),
       lon: parseFloat(cols[4])
@@ -61,6 +64,7 @@ async function load() {
 
 function populateReps() {
   const reps = [...new Set(data.map(d => d.rep))];
+
   const dropdown = document.getElementById("repFilter");
 
   reps.forEach(r => {
@@ -78,26 +82,32 @@ function drawMarkers() {
   markers = [];
 
   const repVal = document.getElementById("repFilter").value;
-  const dateVal = document.getElementById("dateFilter").value;
+  const startVal = document.getElementById("startDate").value;
+  const endVal = document.getElementById("endDate").value;
+
+  const startDate = startVal ? new Date(startVal) : null;
+  const endDate = endVal ? new Date(endVal) : null;
 
   data.forEach(d => {
 
-    if (isNaN(d.lat) || isNaN(d.lon)) return;
+    if (isNaN(d.lat) || isNaN(d.lon) || !d.date) return;
 
     if (repVal && d.rep !== repVal) return;
 
-    if (dateVal && (!d.date || !d.date.includes(dateVal))) return;
+    if (startDate && d.date < startDate) return;
+    if (endDate && d.date > endDate) return;
 
     const marker = L.marker([d.lat, d.lon])
       .addTo(map)
-      .bindPopup(`Rep: ${d.rep}<br>Date: ${d.date}<br>${d.title}`);
+      .bindPopup(`Rep: ${d.rep}<br>${d.title}`);
 
     markers.push(marker);
   });
 }
 
 document.getElementById("repFilter").addEventListener("change", drawMarkers);
-document.getElementById("dateFilter").addEventListener("keyup", drawMarkers);
+document.getElementById("startDate").addEventListener("change", drawMarkers);
+document.getElementById("endDate").addEventListener("change", drawMarkers);
 
 load();
 
