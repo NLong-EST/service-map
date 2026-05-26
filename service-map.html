@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+#map { height: 600px; }
+</style>
+</head>
+
+<body>
+
+<h3>Service Map</h3>
+
+<div id="map"></div>
+
+<script>
+
+const excelUrl = "https://skalaranalytical.sharepoint.com/sites/NASkalarServiceScheduling/Shared%20Documents/Apps/FSM%20SOs%20-%20Excel-for%20app.xlsx";
+
+const map = L.map('map').setView([39, -98], 4);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+async function load() {
+
+  const res = await fetch(excelUrl);
+  const file = await res.arrayBuffer();
+
+  const wb = XLSX.read(file, { type: 'array' });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(sheet);
+
+  data.forEach(row => {
+
+    if (!row["Site Lat"] || !row["Site Lon"]) return;
+
+    L.marker([row["Site Lat"], row["Site Lon"]])
+      .addTo(map)
+      .bindPopup(row.Title);
+
+  });
+}
+
+load();
+
+</script>
+
+</body>
+</html>
