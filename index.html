@@ -2,14 +2,35 @@
 <html>
 <head>
 
-<title>Service Map</title>
+<title>Agilent ASP Workload Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-  #map { height: 600px; margin-top: 10px; }
+#map { height: 600px; margin-top: 10px; }
+
+/* Dropdown container */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 999;
+}
+
+.dropdown.open .dropdown-content {
+  display: block;
+}
 </style>
 
 </head>
@@ -19,40 +40,38 @@
 <h3>Agilent ASP Workload Map</h3>
 
 <label>Rep:</label>
-<select id="repFilter">
-  <option value="">All</option>
-</select>
+
+<div class="dropdown" id="dropdown">
+  <button onclick="toggleDropdown()">Select Reps</button>
+  <div class="dropdown-content" id="repFilter"></div>
+</div>
+
+<button onclick="selectAll()">All</button>
+<button onclick="clearAll()">None</button>
+
+<br><br>
 
 <label>Start:</label>
 <input type="date" id="startDate">
 
 <label>End:</label>
 <input type="date" id="endDate">
+
 <div style="margin-top:5px;">
   <b>Total: <span id="count"></span></b>
 </div>
 
-
-  <div style="display:flex;align-items:center;gap:15px;margin-top:5px;">
-    <b>Legend:</b>
-
-    <span style="display:inline-flex;align-items:center;gap:5px;">
-      <span style="width:12px;height:12px;background:blue;"></span>
-      Scheduled
-    </span>
-
-    <span style="display:inline-flex;align-items:center;gap:5px;">
-      <span style="width:12px;height:12px;background:orange;"></span>
-      Unscheduled
-    </span>
-
-  </div>
-
+<div style="display:flex; gap:15px; margin-top:5px;">
+  <b>Legend:</b>
+  <span style="display:flex;align-items:center;gap:5px;">
+    <span style="width:12px;height:12px;background:blue;"></span>
+    Scheduled
+  </span>
+  <span style="display:flex;align-items:center;gap:5px;">
+    <span style="width:12px;height:12px;background:orange;"></span>
+    Unscheduled
+  </span>
 </div>
-
-  <div>
-
-
 
 <div id="map"></div>
 
@@ -65,6 +84,20 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 let data = [];
 let markers = [];
+
+function toggleDropdown() {
+  document.getElementById("dropdown").classList.toggle("open");
+}
+
+function selectAll() {
+  document.querySelectorAll('#repFilter input').forEach(cb => cb.checked = true);
+  drawMarkers();
+}
+
+function clearAll() {
+  document.querySelectorAll('#repFilter input').forEach(cb => cb.checked = false);
+  drawMarkers();
+}
 
 async function load() {
   const res = await fetch(fileUrl);
@@ -91,20 +124,27 @@ async function load() {
 
 function populateReps() {
   const reps = [...new Set(
-    data
-      .map(d => d.rep)
-      .filter(r => r )
-      .sort()
+    data.map(d => d.rep).filter(r => r).sort()
   )];
 
-  const dropdown = document.getElementById("repFilter");
-  dropdown.innerHTML = '<option value="">All</option>';
+  const container = document.getElementById("repFilter");
+  container.innerHTML = "";
 
   reps.forEach(r => {
-    const opt = document.createElement("option");
-    opt.value = r;
-    opt.text = r;
-    dropdown.appendChild(opt);
+    const label = document.createElement("label");
+    label.style.display = "block";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = r;
+    checkbox.checked = true;
+
+    checkbox.addEventListener("change", drawMarkers);
+
+    label.appendChild(checkbox);
+    label.append(" " + r);
+
+    container.appendChild(label);
   });
 }
 
@@ -113,91 +153,76 @@ function drawMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  const repVal = document.getElementById("repFilter").value;
+  const checked = Array.from(
+    document.querySelectorAll('#repFilter input:checked')
+  ).map(cb => cb.value);
+
   const startVal = document.getElementById("startDate").value;
   const endVal = document.getElementById("endDate").value;
 
   const startDate = startVal ? new Date(startVal) : null;
   const endDate = endVal ? new Date(endVal) : null;
-  
-const grouped = {};
+
+  const grouped = {};
+
   data.forEach(d => {
 
     if (isNaN(d.lat) || isNaN(d.lon)) return;
-
-    if (repVal && d.rep !== repVal) return;
+    if (checked.length && !checked.includes(d.rep)) return;
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
-   let popup = `<b>Multiple jobs at this site:</b><br>`;
-popup += d.raw["Title"] + "<br>";
-  const key = d.lat + "," + d.lon;
-    if (!grouped[key]) {
-    grouped[key] = [];
+    const key = d.lat + "," + d.lon;
+
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  });
+
+  for (const key in grouped) {
+
+    const items = grouped[key];
+    const first = items[0];
+
+    let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
+
+    items.forEach(x => {
+      popup += `
+      <div style="margin-bottom:8px;">
+        <b>${x.raw["Title"]}</b><br>
+        ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
+        ${x.raw["Customer"]}<br>
+        ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
+      </div>`;
+    });
+
+    const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
+
+    const marker = L.circleMarker([first.lat, first.lon], {
+      radius: 8,
+      fillColor: color,
+      color: color,
+      weight: 1,
+      fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(popup);
+
+    markers.push(marker);
   }
 
-  grouped[key].push(d);
+  let filteredCount = 0;
+  for (const key in grouped) {
+    filteredCount += grouped[key].length;
+  }
 
-});
-markers.forEach(m => map.removeLayer(m));
-markers = [];
-
-for (const key in grouped) {
-
-  const items = grouped[key];
-  const first = items[0];
-
-  let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
-
-  
-items.forEach(x => {
-  popup += `
-  <div style="margin-bottom:8px;">
-    <b>${x.raw["Title"]}</b><br>
-    ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
-    ${x.raw["Customer"]}<br>
-    ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
-  </div>
-  `;
-});
-
-const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
-
-const marker = L.circleMarker([first.lat, first.lon], {
-  radius: 8,
-  fillColor: color,
-  color: color,
-  weight: 1,
-  opacity: 1,
-  fillOpacity: 0.8
-})
-  .addTo(map)
-  .bindPopup(popup);
-
-  
-
-  markers.push(marker);
+  document.getElementById("count").innerText = filteredCount;
 }
 
-
-let filteredCount = 0;
-
-for (const key in grouped) {
-  filteredCount += grouped[key].length;
-}
-
-document.getElementById("count").innerText = filteredCount;
-
- 
-}
-
-document.getElementById("repFilter").addEventListener("change", drawMarkers);
 document.getElementById("startDate").addEventListener("change", drawMarkers);
 document.getElementById("endDate").addEventListener("change", drawMarkers);
 
 load();
 
 </script>
-
 </body>
 </html>
