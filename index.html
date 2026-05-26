@@ -143,8 +143,8 @@ const grouped = {};
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
-   let popup = `<b>Multiple jobs at this site:</b><br>`;
-popup += d.raw["Title"] + "<br>";
+  
+
   const key = d.lat + "," + d.lon;
     if (!grouped[key]) {
     grouped[key] = [];
