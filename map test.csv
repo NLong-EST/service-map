@@ -1,4 +1,4 @@
-Customer,Activity Subject,Activity Type,Equipment Name,Title,Due Date,OnsiteDate,Site Lat,Site Lon,Rep Initials
+Customer,Activity Subject,Activity Type,Equipment Name,Title,Due Date,Onsite Date,Site Lat,Site Lon,Rep Initials
 Alcon Vision LLC,N5211840 313328582  RELO Jason Hart/DE-INSTALL,RELO,SYS-GC-7890-E,6007373735-1,9/1/2026,7/30/2026,38.43472,-82.31442,CHA
 Alcon Research LLC,N5211840 313328582  RELO Jason Hart/Enterprise Operational Qualification,EOQ,SYS-GC-7890-E,6007373738-3,4/24/2026,8/27/2026,38.43472,-82.31442,CHA
 Alcon Research LLC,N5211840 313328582  RELO Jason Hart/Enterprise Installation Qualification,EIQ,SYS-GC-7890-E,6007373738-2,4/24/2026,8/26/2026,38.43472,-82.31442,CHA
