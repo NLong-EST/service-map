@@ -1,56 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Service Map</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<title>Service Map</title>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <style>
-    #map {
-      height: 600px;
-    }
-  </style>
+<style>
+  #map { height: 600px; margin-top: 10px; }
+</style>
+
 </head>
 
 <body>
 
 <h3>Service Map</h3>
+
+<label>Rep:</label>
+<select id="repFilter">
+  <option value="">All</option>
+</select>
+
+<label>Date (YYYY-MM-DD):</label>
+<input type="text" id="dateFilter" placeholder="2026-05-01">
+
 <div id="map"></div>
 
 <script>
 
-// ✅ CSV FILE (yours)
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv";
 
-// ✅ CREATE MAP
 const map = L.map('map').setView([39, -98], 4);
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// ✅ LOAD DATA
+let data = [];
+let markers = [];
+
 async function load() {
   const res = await fetch(fileUrl);
   const text = await res.text();
 
   const rows = text.trim().split(/\r?\n/).slice(1);
 
-  rows.forEach(row => {
+  data = rows.map(row => {
     const cols = row.split(",");
 
-    const lat = parseFloat(cols[3]);
-    const lon = parseFloat(cols[4]);
+    return {
+      title: cols[0],
+      date: cols[2],
+      rep: cols[5],
+      lat: parseFloat(cols[3]),
+      lon: parseFloat(cols[4])
+    };
+  });
 
-    if (isNaN(lat) || isNaN(lon)) return;
+  populateReps();
+  drawMarkers();
+}
 
-    L.marker([lat, lon])
-      .addTo(map)
-      .bindPopup(cols[0]);
+function populateReps() {
+  const reps = [...new Set(data.map(d => d.rep))];
+  const dropdown = document.getElementById("repFilter");
+
+  reps.forEach(r => {
+    if (!r) return;
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.text = r;
+    dropdown.appendChild(opt);
   });
 }
+
+function drawMarkers() {
+
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  const repVal = document.getElementById("repFilter").value;
+  const dateVal = document.getElementById("dateFilter").value;
+
+  data.forEach(d => {
+
+    if (isNaN(d.lat) || isNaN(d.lon)) return;
+
+    if (repVal && d.rep !== repVal) return;
+
+    if (dateVal && (!d.date || !d.date.includes(dateVal))) return;
+
+    const marker = L.marker([d.lat, d.lon])
+      .addTo(map)
+      .bindPopup(`Rep: ${d.rep}<br>Date: ${d.date}<br>${d.title}`);
+
+    markers.push(marker);
+  });
+}
+
+document.getElementById("repFilter").addEventListener("change", drawMarkers);
+document.getElementById("dateFilter").addEventListener("keyup", drawMarkers);
 
 load();
 
