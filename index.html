@@ -29,6 +29,7 @@
 <label>End:</label>
 <input type="date" id="endDate">
 
+<b>Total: <span id="count">0</span></b>
 <div id="map"></div>
 
 <script>
@@ -111,9 +112,10 @@ function drawMarkers() {
       .addTo(map)
       .bindPopup(popup);
 
-    markers.push(marker);
-  });
-}
+    
+markers.push(marker);});
+document.getElementById("count").innerText = markers.length;}
+
 
 document.getElementById("repFilter").addEventListener("change", drawMarkers);
 document.getElementById("startDate").addEventListener("change", drawMarkers);
