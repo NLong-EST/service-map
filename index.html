@@ -29,22 +29,28 @@
 <label>End:</label>
 <input type="date" id="endDate">
 
-<b>Total: <span id="count">0</span></b>
+<div style="margin-top:5px;"><div style="margin-top:5pxspan id="count">0</span></b>
+  </div>
 
+  <div style="display:flex;align-items:center;gap:15px;margin-top:5px;">
+    <b>Legend:</b>
 
-<div id="legend" style="background:white;padding:6px;border:1px solid #ccc;display:inline-flex;gap:15px;align-items:center;margin-top:5px;">
-  <b>Legend:</b>
+    <span style="display:inline-flex;align-items:center;gap:5px;">
+      <span style="width:12px;height:12px;background:blue;"></span>
+      Scheduled
+    </span>
 
-  <span style="display:inline-flex;align-items:center;gap:5px;">
-    <span style="width:12px;height:12px;background:blue;"></span>
-    Scheduled
-  </span>
+    <span style="display:inline-flex;align-items:center;gap:5px;">
+      <span style="width:12px;height:12px;background:orange;"></span>
+      Unscheduled
+    </span>
 
-  <span style="display:inline-flex;align-items:center;gap:5px;">
-    <span style="width:12px;height:12px;background:orange;"></span>
-    Unscheduled
-  </span>
+  </div>
+
 </div>
+
+  <div>
+
 
 
 <div id="map"></div>
@@ -146,9 +152,9 @@ items.forEach(x => {
   popup += `
   <div style="margin-bottom:8px;">
     <b>${x.raw["Title"]}</b><br>
-    ${x.raw["Rep Initials"]} > ${x.raw["Onsite Date"]}<br>
+    ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
     ${x.raw["Customer"]}<br>
-    ${x.raw["Equipment Name"]} > ${x.raw["Activity Type"]}
+    ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
   </div>
   `;
 });
