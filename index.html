@@ -94,6 +94,7 @@ function populateReps() {
     data
       .map(d => d.rep)
       .filter(r => r )
+      .sort()
   )];
 
   const dropdown = document.getElementById("repFilter");
