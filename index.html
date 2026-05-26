@@ -31,13 +31,21 @@
 
 <b>Total: <span id="count">0</span></b>
 
-<div id="legend" style="background:white;padding:10px;border:1px solid #ccc;width:200px;">
-<b>Legend</b><br>
-<span style="display:inline-block;width:12px;height:12px;background:blue;margin-right:5px;"></span>
-Scheduled<br>
-<span style="display:inline-block;width:12px;height:12px;background:orange;margin-right:5px;"></span>
-Unscheduled
+
+<div id="legend" style="background:white;padding:6px;border:1px solid #ccc;display:inline-flex;gap:15px;align-items:center;margin-top:5px;">
+  <b>Legend:</b>
+
+  <span style="display:inline-flex;align-items:center;gap:5px;">
+    <span style="width:12px;height:12px;background:blue;"></span>
+    Scheduled
+  </span>
+
+  <span style="display:inline-flex;align-items:center;gap:5px;">
+    <span style="width:12px;height:12px;background:orange;"></span>
+    Unscheduled
+  </span>
 </div>
+
 
 <div id="map"></div>
 
@@ -138,9 +146,9 @@ items.forEach(x => {
   popup += `
   <div style="margin-bottom:8px;">
     <b>${x.raw["Title"]}</b><br>
-    ${x.raw["Rep Initials"]} | ${x.raw["Onsite Date"]}<br>
+    ${x.raw["Rep Initials"]} > ${x.raw["Onsite Date"]}<br>
     ${x.raw["Customer"]}<br>
-    ${x.raw["Equipment Name"]} | ${x.raw["Activity Type"]}
+    ${x.raw["Equipment Name"]} > ${x.raw["Activity Type"]}
   </div>
   `;
 });
