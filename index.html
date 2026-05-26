@@ -19,9 +19,7 @@
 <h3>Agilent ASP Workload Map</h3>
 
 <label>Rep:</label>
-<select id="repFilter">
-  <option value="">All</option>
-</select>
+<div id="repFilter"></div>
 
 <label>Start:</label>
 <input type="date" id="startDate">
@@ -97,14 +95,26 @@ function populateReps() {
       .sort()
   )];
 
-  const dropdown = document.getElementById("repFilter");
-  dropdown.innerHTML = '<option value="">All</option>';
+  const container = document.getElementById("repFilter");
+container.innerHTML = "";
 
-  reps.forEach(r => {
-    const opt = document.createElement("option");
-    opt.value = r;
-    opt.text = r;
-    dropdown.appendChild(opt);
+reps.forEach(r => {
+  const label = document.createElement("label");
+  label.style.marginRight = "10px";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.value = r;
+  checkbox.checked = true;
+
+  checkbox.addEventListener("change", drawMarkers);
+
+  label.appendChild(checkbox);
+  label.append(" " + r);
+
+  container.appendChild(label);
+});
+
   });
 }
 
@@ -113,7 +123,11 @@ function drawMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  const repVal = document.getElementById("repFilter").value;
+  
+const checked = Array.from(
+  document.querySelectorAll('#repFilter input:checked')
+).map(cb => cb.value);
+
   const startVal = document.getElementById("startDate").value;
   const endVal = document.getElementById("endDate").value;
 
@@ -125,7 +139,7 @@ const grouped = {};
 
     if (isNaN(d.lat) || isNaN(d.lon)) return;
 
-    if (repVal && d.rep !== repVal) return;
+    if (checked.length && !checked.includes(d.rep)) return;
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
