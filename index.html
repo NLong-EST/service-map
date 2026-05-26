@@ -115,6 +115,28 @@ popup += d.raw["Title"] + "<br>";
   grouped[key].push(d);
 
 });
+markers.forEach(m => map.removeLayer(m));
+markers = [];
+
+for (const key in grouped) {
+
+  const items = grouped[key];
+  const first = items[0];
+
+  let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
+
+  items.forEach(x => {
+    popup += x.raw["Title"] + "<br>";
+  });
+
+  const marker = L.marker([first.lat, first.lon])
+    .addTo(map)
+    .bindPopup(popup);
+
+  markers.push(marker);
+}
+
+document.getElementById("count").innerText = markers.length;
  
 
   document.getElementById("count").innerText = markers.length;
