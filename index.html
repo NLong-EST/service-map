@@ -4,8 +4,8 @@
 
 <title>Service Map</title>
 
-https://unpkg.com/leaflet/dist/leaflet.css
-https://unpkg.com/leaflet/dist/leaflet.jsscript>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
   #map { height: 600px; margin-top: 10px; }
@@ -45,7 +45,6 @@ async function load() {
   const text = await res.text();
 
   const headers = text.split("\n")[0].split(",");
-
   const rows = text.trim().split(/\r?\n/).slice(1);
 
   data = rows.map(row => {
@@ -70,7 +69,6 @@ async function load() {
 
 function populateReps() {
   const reps = [...new Set(data.map(d => d.rep))];
-
   const dropdown = document.getElementById("repFilter");
 
   reps.forEach(r => {
@@ -103,7 +101,6 @@ function drawMarkers() {
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
-    // ✅ BUILD FULL POPUP WITH ALL COLUMNS
     let popup = "";
     for (const key in d) {
       if (key === "lat" || key === "lon") continue;
