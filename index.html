@@ -135,10 +135,20 @@ items.forEach(x => {
   popup += `Activity: ${x.raw["Activity Type"]}<br><br>`;
 });
 
+const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
 
-  const marker = L.marker([first.lat, first.lon])
-    .addTo(map)
-    .bindPopup(popup);
+const marker = L.circleMarker([first.lat, first.lon], {
+  radius: 8,
+  fillColor: color,
+  color: color,
+  weight: 1,
+  opacity: 1,
+  fillOpacity: 0.8
+})
+  .addTo(map)
+  .bindPopup(popup);
+
+  
 
   markers.push(marker);
 }
