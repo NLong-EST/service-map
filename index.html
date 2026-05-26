@@ -30,6 +30,7 @@
 <input type="date" id="endDate">
 
 <b>Total: <span id="count">0</span></b>
+
 <div id="map"></div>
 
 <script>
@@ -95,48 +96,28 @@ function drawMarkers() {
   const startDate = startVal ? new Date(startVal) : null;
   const endDate = endVal ? new Date(endVal) : null;
 
-const grouped = {};
+  data.forEach(d => {
 
-data.forEach(d => {
+    if (isNaN(d.lat) || isNaN(d.lon)) return;
 
-  if (isNaN(d.lat) || isNaN(d.lon)) return;
+    if (repVal && d.rep !== repVal) return;
+    if (startDate && d.date < startDate) return;
+    if (endDate && d.date > endDate) return;
 
-  if (repVal && d.rep !== repVal) return;
-  if (startDate && d.date < startDate) return;
-  if (endDate && d.date > endDate) return;
+    let popup = "";
+    for (const key in d.raw) {
+      popup += `<b>${key}:</b> ${d.raw[key]}<br>`;
+    }
 
-  const key = d.lat + "," + d.lon;
+    const marker = L.marker([d.lat, d.lon])
+      .addTo(map)
+      .bindPopup(popup);
 
-  if (!grouped[key]) {
-    grouped[key] = [];
-  }
-
-  grouped[key].push(d);
-});
-
-markers.forEach(m => map.removeLayer(m));
-markers = [];
-
-for (const key in grouped) {
-
-  const items = grouped[key];
-  const first = items[0];
-
-  let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
-
-  items.forEach(d => {
-    popup += `<b>${d.raw["Title"]}</b><br>`;
+    markers.push(marker);
   });
 
-  const marker = L.marker([first.lat, first.lon])
-    .addTo(map)
-    .bindPopup(popup);
-
-  markers.push(marker);
+  document.getElementById("count").innerText = markers.length;
 }
-
-document.getElementById("count").innerText = markers.length;
-
 
 document.getElementById("repFilter").addEventListener("change", drawMarkers);
 document.getElementById("startDate").addEventListener("change", drawMarkers);
@@ -148,4 +129,3 @@ load();
 
 </body>
 </html>
-
