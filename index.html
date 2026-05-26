@@ -93,7 +93,7 @@ function populateReps() {
   const reps = [...new Set(
     data
       .map(d => d.rep)
-      .filter(r => r && /^[A-Z]{2,4}$/.test(r))
+      .filter(r => r )
   )];
 
   const dropdown = document.getElementById("repFilter");
