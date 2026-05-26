@@ -6,6 +6,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
   #map { height: 600px; margin-top: 10px; }
@@ -44,47 +45,36 @@ async function load() {
   const res = await fetch(fileUrl);
   const text = await res.text();
 
-  const parsed = parseCSV(text);
+  Papa.parse(text, {
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
 
-  data = parsed.map(row => {
-    return {
-      lat: parseFloat(row["Site Lat"]),
-      lon: parseFloat(row["Site Lon"]),
-      rep: row["Rep Initials"],
-      date: new Date(row["OnsiteDate"]),
-      raw: row
-    };
-  });
+      data = results.data.map(row => ({
+        lat: parseFloat(row["Site Lat"]),
+        lon: parseFloat(row["Site Lon"]),
+        rep: row["Rep Initials"],
+        date: new Date(row["OnsiteDate"]),
+        raw: row
+      }));
 
-  populateReps();
-  drawMarkers();
-}
-
-// ✅ Proper CSV parser (handles commas inside text)
-function parseCSV(text) {
-  const rows = text.split(/\r?\n/);
-  const headers = rows[0].split(",");
-
-  return rows.slice(1).map(row => {
-    const values = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-
-    let obj = {};
-    headers.forEach((h, i) => {
-      obj[h.trim()] = values[i]?.replace(/^"|"$/g, '') || "";
-    });
-
-    return obj;
+      populateReps();
+      drawMarkers();
+    }
   });
 }
 
 function populateReps() {
-  const reps = [...new Set(data.map(d => d.rep))];
-  const dropdown = document.getElementById("repFilter");
+  const reps = [...new Set(
+    data
+      .map(d => d.rep)
+      .filter(r => r && /^[A-Z]{2,4}$/.test(r))
+  )];
 
+  const dropdown = document.getElementById("repFilter");
   dropdown.innerHTML = '<option value="">All</option>';
 
   reps.forEach(r => {
-    if (!r) return;
     const opt = document.createElement("option");
     opt.value = r;
     opt.text = r;
@@ -135,3 +125,4 @@ load();
 
 </body>
 </html>
+
