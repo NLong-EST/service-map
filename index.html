@@ -104,10 +104,7 @@ function drawMarkers() {
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
-    let popup = "";
-    for (const key in d.raw) {
-      popup += `<b>${key}:</b> ${d.raw[key]}<br>`;
-    }
+   let popup = `<b>Multiple jobs at this site:</b><br>`;
 
   const marker = L.marker([d.lat, d.lon])
   .addTo(map)
