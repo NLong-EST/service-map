@@ -109,10 +109,13 @@ function drawMarkers() {
       popup += `<b>${key}:</b> ${d.raw[key]}<br>`;
     }
 
-    const marker = L.marker([d.lat, d.lon])
-      .addTo(map)
-      .bindPopup(popup);
-
+  const marker = L.marker([d.lat, d.lon])
+  .addTo(map)
+  .bindPopup(popup)
+  .on('mouseover', function () {
+    this.openPopup();
+  });
+     
     markers.push(marker);
   });
 
