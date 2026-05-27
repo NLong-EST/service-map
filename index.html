@@ -38,7 +38,6 @@ function getDistrictColor(name) {
   return {
     "Mountain Northwest": "#00a99d",
     "Lonestar": "#a67cd9",
-       
   }[name] || "#ccc";
 }
 
@@ -48,17 +47,18 @@ fetch('districts.geojson')
   .then(data => {
 
     const districtLayer = L.geoJSON(data, {
-    style: function (feature) {
-  const color = getDistrictColor(feature.properties.name);
+      style: function (feature) {
+        const color = getDistrictColor(feature.properties.name);
 
-  return {
-    color: '#444',
-    weight: 1,
-    fillColor: color ? color : "transparent",
-    fillOpacity: color ? 0.25 : 0
-  };
-}
+        return {
+          color: '#444',
+          weight: 1,
+          fillColor: color ? color : "transparent",
+          fillOpacity: color ? 0.25 : 0
+        };
+      },
 
+      // ✅ THIS COMMA WAS MISSING BEFORE
       onEachFeature: function (feature, layer) {
         layer.bindPopup("<b>" + feature.properties.name + "</b>");
       }
@@ -81,8 +81,9 @@ async function loadData() {
 
       results.data.forEach(row => {
 
-        const lat = parseFloat(row.Latitude);
-        const lng = parseFloat(row.Longitude);
+        // ✅ safer column handling
+        const lat = parseFloat(row.Latitude || row.Lat || row.lat);
+        const lng = parseFloat(row.Longitude || row.Long || row.Lng || row.lng);
 
         if (!isNaN(lat) && !isNaN(lng)) {
 
@@ -95,14 +96,13 @@ async function loadData() {
           }).addTo(map);
 
           marker.bindPopup(
-            "<b>Rep:</b> " + row.Rep + "<br>" +
-            "<b>Status:</b> " + row.Status
+            "<b>Rep:</b> " + (row.Rep || "Unknown") + "<br>" +
+            "<b>Status:</b> " + (row.Status || "Unknown")
           );
 
           markers.push(marker);
         }
       });
-
     }
   });
 }
@@ -113,3 +113,4 @@ loadData();
 
 </body>
 </html>
+``
