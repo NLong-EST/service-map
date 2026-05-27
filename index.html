@@ -224,7 +224,7 @@ function drawMarkers() {
 
 document.getElementById("startDate").addEventListener("change", drawMarkers);
 document.getElementById("endDate").addEventListener("change", drawMarkers);
-
+document.getElementById("startDate").valueAsDate = new Date();
 load();
 
 </script>
