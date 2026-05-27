@@ -48,8 +48,7 @@ fetch('districts.geojson')
   .then(data => {
 
     const districtLayer = L.geoJSON(data, {
-      s
-style: function (feature) {
+    style: function (feature) {
   const color = getDistrictColor(feature.properties.name);
 
   return {
