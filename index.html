@@ -9,36 +9,10 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-#map { height: 600px; margin-top: 10px; }
-
-h3 {
-  font-size: 32px;
-}
-
-/* Dropdown container */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 999;
-  min-width: 200px;
-  white-space: nowrap;
-}
-
-
-.dropdown.open .dropdown-content {
-  display: block;
-}
+  #map {
+    height: 600px;
+    margin-top: 10px;
+  }
 </style>
 
 </head>
@@ -47,67 +21,62 @@ h3 {
 
 <h3>Agilent ASP Workload Map</h3>
 
-<label>Rep:</label>
-
-<div class="dropdown" id="dropdown">
-  <button onclick="toggleDropdown()">Select Reps</button>
-  <div class="dropdown-content" id="repFilter"></div>
-</div>
-
-<button onclick="selectAll()">All</button>
-<button onclick="clearAll()">None</button>
-
-<br><br>
-
-<label>Start:</label>
-<input type="date" id="startDate">
-
-<label>End:</label>
-<input type="date" id="endDate">
-
-<div style="margin-top:5px;">
-  <b>Total Activities: <span id="totalCount"></span> | Filtered Activities: <span id="count"></span></b>
-</div>
-
-<div style="display:flex; gap:15px; margin-top:5px;">
-  <b>Legend:</b>
-  <span style="display:flex;align-items:center;gap:5px;">
-    <span style="width:12px;height:12px;background:blue;"></span>
-    Scheduled
-  </span>
-  <span style="display:flex;align-items:center;gap:5px;">
-    <span style="width:12px;height:12px;background:orange;"></span>
-    Unscheduled
-  </span>
-</div>
-
 <div id="map"></div>
 
 <script>
 
+// ===== CSV DATA =====
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?rand=" + new Date().getTime();
 
-const map = L.map('map');
+// ===== MAP INIT =====
+const map = L.map('map').setView([39, -98], 4);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-let data = [];
+// ===== DISTRICT COLORS =====
+function getDistrictColor(name) {
+  return {
+    "Mountain Northwest": "#00a99d",
+    "Southwest": "#f08080",
+    "Central Plains": "#f2d18b",
+    "MidWest": "#7fd3d7",
+    "Lonestar": "#a67cd9",
+    "NorCal": "#d7a9d7",
+    "New England": "#00c853",
+    "New York Metro": "#f7ea48",
+    "PA DE Southern NJ": "#d77bd7",
+    "MidAtlantic": "#67c5e7",
+    "Carolinas": "#f77f87",
+    "E. Southern": "#7be3c1"
+  }[name] || "#ccc";
+}
+
+// ===== LOAD DISTRICTS =====
+fetch('districts.geojson')
+  .then(res => res.json())
+  .then(data => {
+
+    const districtLayer = L.geoJSON(data, {
+      style: function (feature) {
+        return {
+          color: '#444',
+          weight: 1,
+          fillColor: getDistrictColor(feature.properties.name),
+          fillOpacity: 0.2
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup("<b>" + feature.properties.name + "</b>");
+      }
+    }).addTo(map);
+
+    districtLayer.bringToBack();
+  });
+
+// ===== MARKERS =====
 let markers = [];
 
-function toggleDropdown() {
-  document.getElementById("dropdown").classList.toggle("open");
-}
-
-function selectAll() {
-  document.querySelectorAll('#repFilter input').forEach(cb => cb.checked = true);
-  drawMarkers();
-}
-
-function clearAll() {
-  document.querySelectorAll('#repFilter input').forEach(cb => cb.checked = false);
-  drawMarkers();
-}
-
-async function load() {
+async function loadData() {
   const res = await fetch(fileUrl);
   const text = await res.text();
 
@@ -116,125 +85,37 @@ async function load() {
     skipEmptyLines: true,
     complete: function(results) {
 
-      data = results.data.map(row => ({
-        lat: parseFloat(row["Site Lat"]),
-        lon: parseFloat(row["Site Lon"]),
-        rep: row["Rep Initials"],
-        date: new Date(row["Onsite Date"]),
-        raw: row
-      }));
-      document.getElementById("totalCount").innerText = data.length;
-      populateReps();
-      drawMarkers();
+      results.data.forEach(row => {
+
+        const lat = parseFloat(row.Latitude);
+        const lng = parseFloat(row.Longitude);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+
+          const marker = L.circleMarker([lat, lng], {
+            radius: 5,
+            fillColor: row.Status === "Scheduled" ? "green" : "orange",
+            color: "#000",
+            weight: 1,
+            fillOpacity: 0.8
+          }).addTo(map);
+
+          marker.bindPopup(
+            "<b>Rep:</b> " + row.Rep + "<br>" +
+            "<b>Status:</b> " + row.Status
+          );
+
+          markers.push(marker);
+        }
+      });
+
     }
   });
 }
 
-function populateReps() {
-  const reps = [...new Set(
-    data.map(d => d.rep).filter(r => r).sort()
-  )];
-
-  const container = document.getElementById("repFilter");
-  container.innerHTML = "";
-
-  reps.forEach(r => {
-    const label = document.createElement("label");
-    label.style.display = "block";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = r;
-    checkbox.checked = true;
-
-    checkbox.addEventListener("change", drawMarkers);
-
-    label.appendChild(checkbox);
-    label.append(" " + r);
-
-    container.appendChild(label);
-  });
-}
-
-function drawMarkers() {
-
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-
-  const checked = Array.from(
-    document.querySelectorAll('#repFilter input:checked')
-  ).map(cb => cb.value);
-
-  const startVal = document.getElementById("startDate").value;
-  const endVal = document.getElementById("endDate").value;
-
-  const startDate = startVal ? new Date(startVal) : null;
-  const endDate = endVal ? new Date(endVal) : null;
-
-  const grouped = {};
-
-  data.forEach(d => {
-
-    if (isNaN(d.lat) || isNaN(d.lon)) return;
-    if (!checked.includes(d.rep)) return;
-    if (startDate && d.date < startDate) return;
-    if (endDate && d.date > endDate) return;
-
-    const key = d.lat + "," + d.lon;
-
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(d);
-  });
-
-  for (const key in grouped) {
-
-    const items = grouped[key];
-    const first = items[0];
-
-    let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
-
-    items.forEach(x => {
-      popup += `
-      <div style="margin-bottom:8px;">
-        <b>${x.raw["Title"]}</b><br>
-        ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
-        ${x.raw["Customer"]}<br>
-        ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
-      </div>`;
-    });
-
-    const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
-
-    const marker = L.circleMarker([first.lat, first.lon], {
-      radius: 8,
-      fillColor: color,
-      color: color,
-      weight: 1,
-      fillOpacity: 0.8
-    })
-    .addTo(map)
-    .bindPopup(popup);
-
-    markers.push(marker);
-  }
-
-  let filteredCount = 0;
-  for (const key in grouped) {
-    filteredCount += grouped[key].length;
-  }
-
-  document.getElementById("count").innerText = filteredCount;
-const bounds = markers.map(m => m.getLatLng());
-if (bounds.length) {
-  map.fitBounds(bounds, { maxZoom: 6 });
-}
-}
-
-document.getElementById("startDate").addEventListener("change", drawMarkers);
-document.getElementById("endDate").addEventListener("change", drawMarkers);
-document.getElementById("startDate").valueAsDate = new Date();
-load();
+loadData();
 
 </script>
+
 </body>
 </html>
