@@ -115,18 +115,9 @@ fetch('districts.geojson')
 function getDistrictColor(name) {
   return {
     "Mountain Northwest": "#00a99d",
-    "Southwest": "#f08080",
-    "Central Plains": "#f2d18b",
-    "MidWest": "#7fd3d7",
     "Lonestar": "#a67cd9",
-    "NorCal": "#d7a9d7",
-    "New England": "#00c853",
-    "New York Metro": "#f7ea48",
-    "PA DE Southern NJ": "#d77bd7",
-    "MidAtlantic": "#67c5e7",
-    "Carolinas": "#f77f87",
-    "E. Southern": "#7be3c1"
-  }[name] || "#ccc";
+    
+     }[name] || "#ccc";
 }
 
 let data = [];
