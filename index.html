@@ -91,16 +91,16 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 ====================== */
 function getDistrictColor(name) {
   return {
-    "Mountain Northwest": "#00a99d",   // teal
-    "Southwest": "#f08080",            // light red
+    "Mountain Northwest": "#008f87",   // deep teal
+    "Southwest": "#e53935",            // red
     "Central Plains": "#f2d18b",       // tan
     "MidWest": "#7fd3d7",              // light blue
-    "Lonestar": "#a67cd9",             // purple
+    "Lonestar": "#7b1fa2",             // purple
     "NorCal": "#d7a9d7",               // lavender
     "New England": "#00c853",          // green
     "NY": "#f7ea48",       // yellow
     "PADE": "#d77bd7",    // magenta
-    "MidAtlantic": "#67c5e7",          // sky blue
+    "MidAtlantic": "#1976d2",          // strong blue
     "Carolinas": "#f77f87",            // coral
     "Southern": "#7be3c1"           // aqua green
   }[name] || null;  // keep null so nothing weird renders if mismatch
