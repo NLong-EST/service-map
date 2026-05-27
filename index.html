@@ -220,3 +220,68 @@ function drawMarkers() {
   data.forEach(d => {
 
     if (isNaN(d.lat) || isNaN(d.lon)) return;
+    if (!checked.includes(d.rep)) return;
+    if (startDate && d.date < startDate) return;
+    if (endDate && d.date > endDate) return;
+
+    const key = d.lat + "," + d.lon;
+
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  });
+
+  for (const key in grouped) {
+
+    const items = grouped[key];
+    const first = items[0];
+
+    let popup = `<b>Total jobs: ${items.length}</b><br><br>`;
+
+    items.forEach(x => {
+      popup += `
+      <div style="margin-bottom:8px;">
+        <b>${x.raw["Title"]}</b><br>
+        ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
+        ${x.raw["Customer"]}<br>
+        ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
+      </div>`;
+    });
+
+    const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
+
+    const marker = L.circleMarker([first.lat, first.lon], {
+      radius: 8,
+      fillColor: color,
+      color: color,
+      weight: 1,
+      fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(popup);
+
+    markers.push(marker);
+  }
+
+  let filteredCount = 0;
+  for (const key in grouped) {
+    filteredCount += grouped[key].length;
+  }
+
+  document.getElementById("count").innerText = filteredCount;
+
+  const bounds = markers.map(m => m.getLatLng());
+  if (bounds.length) {
+    map.fitBounds(bounds, { maxZoom: 6 });
+  }
+}
+
+document.getElementById("startDate").addEventListener("change", drawMarkers);
+document.getElementById("endDate").addEventListener("change", drawMarkers);
+document.getElementById("startDate").valueAsDate = new Date();
+
+load();
+
+</script>
+
+</body>
+</html>
