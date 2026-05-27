@@ -48,14 +48,18 @@ fetch('districts.geojson')
   .then(data => {
 
     const districtLayer = L.geoJSON(data, {
-      style: function (feature) {
-        return {
-          color: '#444',
-          weight: 1,
-          fillColor: getDistrictColor(feature.properties.name),
-          fillOpacity: 0.2
-        };
-      },
+      s
+style: function (feature) {
+  const color = getDistrictColor(feature.properties.name);
+
+  return {
+    color: '#444',
+    weight: 1,
+    fillColor: color ? color : "transparent",
+    fillOpacity: color ? 0.25 : 0
+  };
+}
+
       onEachFeature: function (feature, layer) {
         layer.bindPopup("<b>" + feature.properties.name + "</b>");
       }
