@@ -91,9 +91,19 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 ====================== */
 function getDistrictColor(name) {
   return {
-    "Mountain Northwest": "#00a99d",
-    "Lonestar": "#a67cd9"
-  }[name] || null; // IMPORTANT: null hides unfinished states
+    "Mountain Northwest": "#00a99d",   // teal
+    "Southwest": "#f08080",            // light red
+    "Central Plains": "#f2d18b",       // tan
+    "MidWest": "#7fd3d7",              // light blue
+    "Lonestar": "#a67cd9",             // purple
+    "NorCal": "#d7a9d7",               // lavender
+    "New England": "#00c853",          // green
+    "New York Metro": "#f7ea48",       // yellow
+    "PA DE Southern NJ": "#d77bd7",    // magenta
+    "MidAtlantic": "#67c5e7",          // sky blue
+    "Carolinas": "#f77f87",            // coral
+    "E. Southern": "#7be3c1"           // aqua green
+  }[name] || null;  // keep null so nothing weird renders if mismatch
 }
 
 /* ======================
