@@ -87,7 +87,7 @@ h3 {
 
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?rand=" + new Date().getTime();
 
-const map = L.map('map').setView([39, -98], 4);
+const map = L.map('map');
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 let data = [];
@@ -224,6 +224,10 @@ function drawMarkers() {
   }
 
   document.getElementById("count").innerText = filteredCount;
+const bounds = markers.map(m => m.getLatLng());
+if (bounds.length) {
+  map.fitBounds(bounds, { maxZoom: 6 });
+}
 }
 
 document.getElementById("startDate").addEventListener("change", drawMarkers);
