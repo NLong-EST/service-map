@@ -89,6 +89,29 @@ const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/ma
 
 const map = L.map('map');
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+// Load district boundaries
+fetch('districts.geojson')
+  .then(res => res.json())
+  .then(data => {
+
+    const districtLayer = L.geoJSON(data, {
+      style: function (feature) {
+        return {
+          color: '#444',
+          weight: 1,
+          fillColor: getDistrictColor(feature.properties.name),
+          fillOpacity: 0.2
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup(
+          "<b>" + feature.properties.name + "</b>"
+        );
+      }
+    }).addTo(map);
+
+    districtLayer.bringToBack();
+  });
 
 let data = [];
 let markers = [];
