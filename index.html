@@ -109,11 +109,12 @@ function getDistrictColor(name) {
 /* ======================
    ✅ DISTRICT LAYER (SAFE)
 ====================== */
-fetch('districts.geojson')
+let districtLayer;
+  fetch('districts.geojson')
   .then(res => res.json())
   .then(data => {
 
-    const districtLayer = L.geoJSON(data, {
+    districtLayer = L.geoJSON(data, {
       style: function (feature) {
 
         const color = getDistrictColor(feature.properties.name);
@@ -291,6 +292,14 @@ document.getElementById("startDate").valueAsDate = new Date();
 
 load();
 
+// ✅ ADD THIS RIGHT HERE
+document.getElementById("toggleDistricts").addEventListener("change", function() {
+  if (this.checked) {
+    map.addLayer(districtLayer);
+  } else {
+    map.removeLayer(districtLayer);
+  }
+});
 </script>
 
 </body>
