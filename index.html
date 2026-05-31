@@ -279,7 +279,7 @@ function drawMarkers() {
       </div>`;
     });
 
-    const color = first.rep && first.rep.endsWith("-T") ? "orange" : "blue";
+    const color = first.rep && first.rep.endsWith("-O") ? "orange" : "blue";
 
     const marker = L.circleMarker([first.lat, first.lon], {
       radius: 8,
