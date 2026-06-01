@@ -37,10 +37,12 @@ h3 {
   display: block;
 }
   
+
 .marker-circle {
     color: white;
-    border-radius: 50%;
-    width: 30px;
+    border-radius: 20px;        /* smoother rounded pill instead of fixed circle */
+    padding: 4px 6px;           /* ✅ allows flexible width */
+    min-width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
@@ -48,7 +50,9 @@ h3 {
     font-size: 11px;
     font-weight: bold;
     border: 2px solid white;
+    box-sizing: border-box;
 }
+
 
 </style>
 
