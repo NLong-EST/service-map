@@ -283,15 +283,19 @@ function drawMarkers() {
 
     const color = first.rep && first.rep.endsWith("-O") ? "orange" : "blue";
 
-    const marker = L.circleMarker([first.lat, first.lon], {
-      radius: 8,
-      fillColor: color,
-      color: color,
-      weight: 1,
-      fillOpacity: 0.8
-    })
+    const initials = first.rep;  // ✅ this matches your existing data
+
+const markerIcon = L.divIcon({
+    className: '',
+    html: `<div class="marker-circle" style="background:${color}">${initials}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+});
+
+const marker = L.marker([first.lat, first.lon], { icon: markerIcon })
     .addTo(map)
     .bindPopup(popup);
+
 
     markers.push(marker);
   }
