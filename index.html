@@ -298,9 +298,17 @@ function drawMarkers() {
       </div>`;
     });
 
-    const color = first.rep && first.rep.endsWith("-O") ? "orange" : "blue";
+   
+let initials = first.rep;
+let color;
 
-    const initials = first.rep;  // ✅ this matches your existing data
+if (initials && initials.toLowerCase().includes("unassigned")) {
+    initials = "UN";
+    color = "#f4c542";   // yellow
+} else {
+    color = first.rep && first.rep.endsWith("-O") ? "orange" : "blue";
+}
+
 
 const markerIcon = L.divIcon({
     className: '',
