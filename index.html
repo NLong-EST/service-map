@@ -132,6 +132,12 @@ const map = L.map('map').setView([39, -98], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 map.zoomControl.setPosition('topright');
   
+L.control.scale({
+  position: 'bottomleft',
+  imperial: true,
+  metric: false
+}).addTo(map);
+
 /* ======================
    ✅ DISTRICT COLORS
 ====================== */
