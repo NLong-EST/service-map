@@ -113,6 +113,11 @@ h3 {
     <input type="checkbox" id="toggleDistricts" checked>
 </label>
 
+<label style="display:flex; align-items:center; gap:5px; margin-top:5px;">
+    <span style="font-weight:bold;">Show Rep Homes:</span>
+    <input type="checkbox" id="toggleReps">
+</label>
+
 
 </div>
 
@@ -383,6 +388,7 @@ async function loadReps() {
           .bindPopup("<b>" + row["Rep Name"] + "</b><br>" + row["Location"]);
 
         repMarkers.push(marker);
+        map.removeLayer(marker);
       });
     }
   });
@@ -396,6 +402,15 @@ document.getElementById("toggleDistricts").addEventListener("change", function()
     map.removeLayer(districtLayer);
   }
 });
+  
+document.getElementById("toggleReps").addEventListener("change", function() {
+  if (this.checked) {
+    repMarkers.forEach(m => map.addLayer(m));
+  } else {
+    repMarkers.forEach(m => map.removeLayer(m));
+  }
+});
+
 </script>
 
 </body>
