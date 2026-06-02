@@ -127,7 +127,7 @@ h3 {
 <script>
 
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?rand=" + new Date().getTime();
-
+const repFileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/RepHome.csv";
 const map = L.map('map').setView([39, -98], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 map.zoomControl.setPosition('topright');
@@ -357,8 +357,7 @@ document.getElementById("endDate").addEventListener("change", drawMarkers);
 document.getElementById("startDate").valueAsDate = new Date();
 
 load();
-
-// ✅ ADD THIS RIGHT HERE
+loadReps();
 document.getElementById("toggleDistricts").addEventListener("change", function() {
   if (this.checked) {
     map.addLayer(districtLayer);
