@@ -132,6 +132,16 @@ h3 {
 
 
 <script>
+fetch("https://api.github.com/repos/NLong-EST/service-map/commits?path=map%20test.csv")
+  .then(r => r.json())
+  .then(d => {
+    const dt = new Date(d[0].commit.committer.date);
+    document.getElementById("lastUpdated").innerText =
+      dt.toLocaleString();
+  })
+  .catch(() => {
+    document.getElementById("lastUpdated").innerText = "Unavailable";
+  });
 
 const fileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/map%20test.csv?rand=" + new Date().getTime();
 const repFileUrl = "https://raw.githubusercontent.com/NLong-EST/service-map/main/RepHome.csv";
