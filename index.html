@@ -250,7 +250,10 @@ async function load() {
         lat: parseFloat(row["Site Lat"]),
         lon: parseFloat(row["Site Lon"]),
         rep: row["Rep Initials"],
-        date: new Date(row["Onsite Date"]),
+    date: (row["Rep Initials"] && row["Rep Initials"].toLowerCase().includes("unassigned"))
+    ? new Date(row["Due Date"])
+    : new Date(row["Onsite Date"]),
+
         raw: row
       }));
 
@@ -329,7 +332,14 @@ function drawMarkers() {
       popup += `
       <div style="margin-bottom:8px;">
         <b>${x.raw["Title"]}</b><br>
-        ${x.raw["Rep Initials"]} : ${x.raw["Onsite Date"]}<br>
+       
+${x.raw["Rep Initials"]} : ${
+  (x.raw["Rep Initials"] && x.raw["Rep Initials"].toLowerCase().includes("unassigned"))
+    ? "Due: " + x.raw["Due Date"]
+    : "Onsite: " + x.raw["Onsite Date"]
+}
+
+        
         ${x.raw["Customer"]}<br>
         ${x.raw["Equipment Name"]} : ${x.raw["Activity Type"]}
       </div>`;
