@@ -315,11 +315,16 @@ function drawMarkers() {
     if (startDate && d.date < startDate) return;
     if (endDate && d.date > endDate) return;
 
-    const key = d.lat + "," + d.lon;
+    const key = d.lat + "," + d.lon + "," + d.rep;
 
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(d);
   });
+
+  // Track how many markers already exist at a given lat/lon so we can
+  // fan out markers that share the exact same site coordinates but
+  // belong to different reps.
+  const coordCounts = {};
 
   for (const key in grouped) {
 
@@ -366,7 +371,18 @@ const markerIcon = L.divIcon({
 });
 
 
-const marker = L.marker([first.lat, first.lon], { icon: markerIcon })
+const coordKey = first.lat + "," + first.lon;
+const n = coordCounts[coordKey] || 0;
+coordCounts[coordKey] = n + 1;
+
+// Fan markers out in a small ring around the true coordinate so
+// multiple reps at the same site don't sit exactly on top of one another.
+const offsetDist = 0.02; // ~ a couple km, adjust to taste
+const angle = n * (Math.PI / 3); // spread successive markers around a circle
+const latOffset = n === 0 ? 0 : offsetDist * Math.sin(angle);
+const lonOffset = n === 0 ? 0 : offsetDist * Math.cos(angle);
+
+const marker = L.marker([first.lat + latOffset, first.lon + lonOffset], { icon: markerIcon })
     .addTo(map)
     .bindPopup(popup);
 
